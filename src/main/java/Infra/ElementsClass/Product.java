@@ -1,14 +1,20 @@
 package Infra.ElementsClass;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Product {
-    private final String name;
-    private final String price;
-    // Constructor to initialize the Product object
-    public Product(String name, String price) {
-        this.name = name;
-        this.price = price;
+    WebElement element;
+    private String name;
+    private String desc;
+    private String price;
+    private String buttonId;
+
+    public Product(WebElement element) {
+        this.element = element;
     }
 
     // Getters for the fields
@@ -16,15 +22,22 @@ public class Product {
         return name;
     }
 
+    public String getDesc() {
+        return desc;
+    }
+
     public String getPrice() {
         return price;
     }
 
+    public String getButtonId() {
+        return buttonId;
+    }
 
-    public boolean isIdentical(Product otherProduct) {
-        return this.name.equals(otherProduct.getName()) &&
-                this.price.equals(otherProduct.getPrice());
+    public void setProduct(){
+        price = element.findElement(By.xpath(".//div[contains(@class, 'inventory_item_price')]")).getText();
+        name = element.findElement(By.xpath(".//div[contains(@class, 'inventory_item_name')]")).getText();
+        desc = element.findElement(By.xpath(".//div[contains(@class, 'inventory_item_desc')]")).getText();
+        buttonId = element.findElement(By.xpath(".//button")).getAttribute("id");
     }
 }
-
-

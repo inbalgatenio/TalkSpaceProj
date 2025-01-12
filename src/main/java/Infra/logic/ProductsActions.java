@@ -1,6 +1,7 @@
 package Infra.logic;
 
 import Infra.ElementsClass.Product;
+import Infra.ElementsClass.ProductManage;
 import Infra.Pages.CartPage;
 import Infra.Pages.ProductPage;
 import org.openqa.selenium.By;
@@ -16,8 +17,6 @@ public class ProductsActions {
     int prodSum;
     ProductPage prodPage;
     CartPage cartPage;
-    Product product;
-    Product productCart;
 
     public ProductsActions(WebDriver driver) {
         prodPage = new ProductPage(driver);
@@ -35,6 +34,10 @@ public class ProductsActions {
         prodPage.clickOnCartLink();
     }
 
+    public void goToProductsPage() {
+        prodPage.navigateToPage();
+    }
+
     public void checkNumberOfProductsInCart(int i) {
         assert prodPage.getCartProductsSum() == prodSum + i;
     }
@@ -43,26 +46,11 @@ public class ProductsActions {
         return prodPage.getProductsList().size();
     }
 
-    public boolean isProductSortedByPrice(boolean ascending) {
-        // Extract prices as a list of doubles
-        List<Double> prices = new ArrayList<>();
-        for (WebElement priceElement : prodPage.getPrices()) {
-            String priceText = priceElement.getText().replace("$", "").trim(); // Remove "$" if present
-            prices.add(Double.parseDouble(priceText));
-        }
-
-        // Create a copy of the original list to avoid modifying it
-        List<Double> sortedPrices = new ArrayList<>(prices);
-
-        // Sort the copied list in the desired order
-        if (ascending) {
-            Collections.sort(sortedPrices);
-        } else {
-            Collections.sort(sortedPrices, Collections.reverseOrder());
-        }
-
-        // Compare the sorted list with the original list
-        return prices.equals(sortedPrices);
+    public boolean isProductSortedByPrice() {
+        ProductManage productManage = new ProductManage();
+        List<Product> prodList = productManage.setProductsList(prodPage.getProductsList());
+        return productManage.areProductListIdentical(prodPage.getProductsList(),
+                productManage.sortProductsByPriceDesc(prodList));
     }
 
     public void selectSortHighToLow(){
@@ -86,7 +74,7 @@ public class ProductsActions {
     }
 
     public boolean isButtonChanged(String oldButtonId, String newButtonId) {
-        return isButtonDisplayedInProducts(oldButtonId) || isButtonDisplayedInProducts(newButtonId);
+        return (isButtonDisplayedInProducts(oldButtonId) || isButtonDisplayedInProducts(newButtonId));
     }
 
     public WebElement getElementByButtonNameFromProducts(String buttonId){
@@ -111,25 +99,14 @@ public class ProductsActions {
     public Product getProductByButtonId(List<WebElement> products, String buttonId){
         for (WebElement element : products) {
             WebElement button = element.findElement(By.xpath(".//button"));
-            if (buttonId.equals(button.getAttribute("id"))) {
-                String price = element.findElement(By.xpath(".//div[contains(@class, 'inventory_item_price')]")).getText();
-                String name = element.findElement(By.xpath(".//div[contains(@class, 'inventory_item_name')]")).getText();
-                return new Product(name, price);
+            String butId = button.getAttribute("id");
+            if (buttonId.equals(butId)) {
+                Product product = new Product(element);
+                product.setProduct();
+                return product;
             }
         }
         return null;
-    }
-
-    public boolean verifyCartAndInventoryProductsIdentical(String buttonId){
-        cartPage.navigateToPage();
-        Product productCart  = getProductByButtonId(cartPage.getProductsCartList(), buttonId);
-        prodPage.navigateToPage();
-        Product productInventory = getProductByButtonId(prodPage.getProductsList(), buttonId);
-        return areProductsIdentical(productCart, productInventory);
-    }
-
-    public boolean areProductsIdentical(Product product1, Product product2) {
-        return product1.isIdentical(product2);
     }
 
     public void clickOnAddToCart(String id) {
@@ -141,4 +118,14 @@ public class ProductsActions {
             assert false;
         }
     }
+
+    public boolean verifyCartAndInventoryProductsIdentical(String buttonId){
+        ProductManage productManag = new ProductManage();
+        cartPage.navigateToPage();
+        Product product1 = getProductByButtonId(cartPage.getProductsCartList(), buttonId);
+        prodPage.navigateToPage();
+        Product product2 = getProductByButtonId(prodPage.getProductsList(), buttonId);
+        return productManag.areProductsIdentical(product1, product2);
+    }
+
 }

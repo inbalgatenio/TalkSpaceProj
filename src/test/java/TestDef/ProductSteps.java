@@ -31,13 +31,14 @@ public class ProductSteps extends BaseTest {
 
     @And("Verify Button changed in product page")
     public void verify_button_changed_in_products() {
-        productActions.isButtonChanged(removeStr + productName, addToStr + productName);
+        productActions.goToProductsPage();
+        Assert.assertTrue(productActions.isButtonChanged(removeStr + productName, addToStr + productName));
     }
 
     @And("Verify Button changed in cart page")
     public void verify_button_changed_in_cart() {
         productActions.goToCartPage();
-        productActions.isButtonChanged(removeStr + productName, addToStr + productName);
+        Assert.assertTrue(productActions.isButtonChanged(removeStr + productName, addToStr + productName));
     }
 
     @Given("Given There are produces more then {int} products in the list")
@@ -47,7 +48,7 @@ public class ProductSteps extends BaseTest {
 
     @Given("Verify products are not sorting")
     public void verifyProductsAreNotSorting() {
-        Assert.assertFalse(productActions.isProductSortedByPrice(false));
+        Assert.assertFalse(productActions.isProductSortedByPrice());
     }
 
     @When("Select sorting by price from high to low")
@@ -57,6 +58,6 @@ public class ProductSteps extends BaseTest {
 
     @Then("Verify products are sorting")
     public void verifyProductsAreSorting() {
-        Assert.assertTrue(productActions.isProductSortedByPrice(false));
+        Assert.assertTrue(productActions.isProductSortedByPrice());
     }
 }
